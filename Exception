@@ -1,1 +1,177 @@
+Exception Handling
 
+1)Exception Handling in Java Spring Boot: Example
+
+Exception handling in Spring Boot is a critical aspect of building robust and user-friendly REST APIs. 
+It ensures that errors are managed gracefully and meaningful responses are returned to the client. 
+Below is an example demonstrating how to handle exceptions in a Spring Boot application.
+
+Example: Handling Custom Exceptions
+
+Step 1: Create Custom Exceptions
+
+Define custom exceptions to represent specific error scenarios. For instance:
+
+// Exception for when a customer already exists
+package com.example.exception;
+
+public class CustomerAlreadyExistsException extends RuntimeException {
+public CustomerAlreadyExistsException(String message) {
+super(message);
+}
+}
+
+// Exception for when a customer is not found
+package com.example.exception;
+
+public class NoSuchCustomerExistsException extends RuntimeException {
+public NoSuchCustomerExistsException(String message) {
+super(message);
+}
+}
+
+Step 2: Create a Global Exception Handler
+
+Use @ControllerAdvice to handle exceptions globally across the application.
+
+package com.example.exception;
+
+import org.springframework.http.HttpStatus;
+import org.springframework.web.bind.annotation.ControllerAdvice;
+import org.springframework.web.bind.annotation.ExceptionHandler;
+import org.springframework.web.bind.annotation.ResponseBody;
+import org.springframework.web.bind.annotation.ResponseStatus;
+
+@ControllerAdvice
+public class GlobalExceptionHandler {
+
+@ExceptionHandler(CustomerAlreadyExistsException.class)
+@ResponseStatus(HttpStatus.CONFLICT)
+@ResponseBody
+public ErrorResponse handleCustomerAlreadyExistsException(CustomerAlreadyExistsException ex) {
+return new ErrorResponse(HttpStatus.CONFLICT.value(), ex.getMessage());
+}
+
+@ExceptionHandler(NoSuchCustomerExistsException.class)
+@ResponseStatus(HttpStatus.NOT_FOUND)
+@ResponseBody
+public ErrorResponse handleNoSuchCustomerExistsException(NoSuchCustomerExistsException ex) {
+return new ErrorResponse(HttpStatus.NOT_FOUND.value(), ex.getMessage());
+}
+}
+Copy
+Step 3: Define an Error Response Class
+
+Create a class to structure the error response.
+
+package com.example.exception;
+
+public class ErrorResponse {
+private int statusCode;
+private String message;
+
+public ErrorResponse(int statusCode, String message) {
+this.statusCode = statusCode;
+this.message = message;
+}
+
+// Getters and setters
+public int getStatusCode() {
+return statusCode;
+}
+
+public void setStatusCode(int statusCode) {
+this.statusCode = statusCode;
+}
+
+public String getMessage() {
+return message;
+}
+
+public void setMessage(String message) {
+this.message = message;
+}
+}
+
+Step 4: Use Exceptions in the Service Layer
+
+Throw the custom exceptions in your service logic when specific conditions are met.
+
+package com.example.service;
+
+import com.example.exception.CustomerAlreadyExistsException;
+import com.example.exception.NoSuchCustomerExistsException;
+import com.example.model.Customer;
+import com.example.repository.CustomerRepository;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Service;
+
+import java.util.Optional;
+
+@Service
+public class CustomerService {
+
+@Autowired
+private CustomerRepository customerRepository;
+
+public String addCustomer(Customer customer) {
+Optional<Customer> existingCustomer = customerRepository.findByEmail(customer.getEmail());
+if (existingCustomer.isPresent()) {
+throw new CustomerAlreadyExistsException("Customer already exists with email: " + customer.getEmail());
+}
+customerRepository.save(customer);
+return "Customer added successfully!";
+}
+
+public Customer getCustomerById(Long id) {
+return customerRepository.findById(id)
+.orElseThrow(() -> new NoSuchCustomerExistsException("No customer found with ID: " + id));
+}
+}
+
+Step 5: Controller Layer
+
+Expose REST endpoints and let exceptions propagate to the global handler.
+
+package com.example.controller;
+
+import com.example.model.Customer;
+import com.example.service.CustomerService;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.web.bind.annotation.*;
+
+@RestController
+@RequestMapping("/api/customers")
+public class CustomerController {
+
+@Autowired
+private CustomerService customerService;
+
+@PostMapping
+public String addCustomer(@RequestBody Customer customer) {
+return customerService.addCustomer(customer);
+}
+
+@GetMapping("/{id}")
+public Customer getCustomer(@PathVariable Long id) {
+return customerService.getCustomerById(id);
+}
+}
+
+Output Example
+
+When a customer is not found, the API will return:
+
+{
+"statusCode": 404,
+"message": "No customer found with ID: 1"
+}
+Copy
+When a duplicate customer is added:
+
+{
+"statusCode": 409,
+"message": "Customer already exists with email: example@example.com"
+}
+Copy
+This approach ensures clean separation of concerns, reusable exception handling logic, and meaningful error responses for clients.
