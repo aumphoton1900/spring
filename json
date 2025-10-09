@@ -1,0 +1,13 @@
+
+private void writeJSON(Student student) throws JsonGenerationException, JsonMappingException, IOException{
+      ObjectMapper mapper = new ObjectMapper();	
+      mapper.writeValue(new File("student.json"), student);
+   }
+
+   private Student readJSON() throws JsonParseException, JsonMappingException, IOException{
+      ObjectMapper mapper = new ObjectMapper();
+      Student student = mapper.readValue(new File("student.json"), Student.class);
+      return student;
+   }
+
+https://www.tutorialspoint.com/jackson/jackson_object_serialization.htm
