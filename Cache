@@ -1,0 +1,51 @@
+In Spring Boot, when using Caffeine Cache, expireAfterWrite and refreshAfterWrite are two important configurations 
+for managing cache expiration and refreshing. Here's a concise explanation of both:
+
+1. expireAfterWrite
+Purpose: Specifies the duration after the last write operation (creation or update) during which the cache entry remains valid. 
+Once this duration passes, the entry is automatically removed.
+Use Case: Ideal for scenarios where stale data should be removed entirely after a fixed time.
+Example Configuration:
+
+Java
+
+Copy code
+@Bean
+public Caffeine<Object, Object> caffeineConfig() {
+    return Caffeine.newBuilder()
+                   .expireAfterWrite(10, TimeUnit.MINUTES); // Expires 10 minutes after write
+}
+2. refreshAfterWrite
+Purpose: Specifies the duration after the last write operation during which the cache entry remains valid, but instead of removing the entry, 
+it triggers an asynchronous refresh to update the value.
+Requirement: Requires a cache loader to fetch the updated value.
+Use Case: Useful when you want to ensure data freshness without removing the entry, allowing stale data to be served until the refresh completes.
+Example Configuration:
+
+Java
+
+Copy code
+@Bean
+public Caffeine<Object, Object> caffeineConfig() {
+    return Caffeine.newBuilder()
+                   .refreshAfterWrite(5, TimeUnit.MINUTES); // Refreshes 5 minutes after write
+}
+Note: refreshAfterWrite works only with a LoadingCache, as it needs a loader to fetch the updated value.
+
+Key Differences
+Feature	expireAfterWrite	refreshAfterWrite
+Behavior	Removes the entry after expiration.	Refreshes the entry asynchronously.
+Data Availability	Data becomes unavailable after expiry.	Stale data is served until refresh completes.
+Cache Loader	Not required.	Required.
+Spring Boot Integration
+In Spring Boot, you can configure these properties in application.yml when using Caffeine with Spring's caching abstraction:
+
+Yaml
+
+Copy code
+spring:
+  cache:
+    caffeine:
+      spec: expireAfterWrite=10m,refreshAfterWrite=5m
+This configuration ensures that entries expire after 10 minutes and refresh 
+
