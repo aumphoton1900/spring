@@ -19,5 +19,16 @@ Useful for teams that want to see exactly when and how branches joined
 
 Can lead to “messy” histories with lots of merge commits
 
+3)
+git rebase takes the commits from one branch and replays them on top of another. 
+It does not create a merge commit. Instead, it rewrites commit history so 
+it looks like you developed your work directly on top of the branch you rebased onto.
+
+# Switch to feature branch
+git checkout your-feature-branch
+
+# Rebase feature branch onto main
+git rebase main
+
 
 
