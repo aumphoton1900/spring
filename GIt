@@ -3,9 +3,20 @@ What Is Git Merge? (with Example)
 git merge takes the history of two branches and creates a new merge commit (a “third” commit that ties the two histories together). 
 This preserves the full record of how the branches diverged and then rejoined.
 
-# Start on the main branch
+# Start on the main branch1
 git checkout main
 # Merge feature branch into main
 git merge your-feature-branch
+
+
+2)
+✅ Advantages of git merge:
+
+Preserves complete history
+Useful for teams that want to see exactly when and how branches joined
+❌ Disadvantages of git merge:
+
+Can lead to “messy” histories with lots of merge commits
+
 
 
