@@ -1,1 +1,5 @@
+1)
+What Is Git Merge? (with Example)
+git merge takes the history of two branches and creates a new merge commit (a “third” commit that ties the two histories together). 
+This preserves the full record of how the branches diverged and then rejoined.
 
