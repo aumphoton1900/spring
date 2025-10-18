@@ -81,25 +81,67 @@ Do you want me to prepare that?
 
 
 
-JavaScript
-Testing Tools
+2)
+Zero-Downtime Deployments
+1
+2
+Zero-downtime deployments ensure that applications remain available and uninterrupted during updates. This is critical for maintaining user experience and business continuity. Below are the most effective strategies to achieve zero-downtime deployments.
 
-Generate test data
+1. Blue-Green Deployment
 
-Integrate test cases
-More Actions
+This strategy involves maintaining two identical environments: Blue (current) and Green (new).
 
-Perform code review
+Steps:
 
-Explain the code
+Deploy the new version to the Green environment while the Blue environment remains live.
 
-Add error handling
+Test the new version in the Green environment.
 
-Make code compilable
-Recreate
+Switch traffic from Blue to Green using a load balancer once testing is successful.
 
+Rollback is simple—redirect traffic back to the Blue environment if issues arise.
 
+Advantages: Quick rollback and minimal risk. Considerations: Requires additional infrastructure, increasing costs.
 
-Copy
+2. Canary Deployment
 
-Export
+This approach introduces the new version incrementally to a small subset of users.
+
+Steps:
+
+Deploy the new version to a small percentage of servers or users.
+
+Monitor performance and gather feedback.
+
+Gradually increase traffic to the new version until it fully replaces the old one.
+
+Rollback involves stopping further rollout and reverting affected users.
+
+Advantages: Reduces risk by limiting exposure. Considerations: Requires robust monitoring systems.
+
+3. Rolling Deployment
+
+Updates are applied gradually across servers in batches.
+
+Steps:
+
+Update a subset of servers while others continue serving traffic.
+
+Monitor updated servers before proceeding to the next batch.
+
+Repeat until all servers are updated.
+
+Advantages: No need for duplicate environments. Considerations: Rollback can be complex if issues arise mid-deployment.
+
+Best Practices
+
+Use load balancers to manage traffic during transitions.
+
+Implement health checks to ensure only healthy instances serve traffic.
+
+Leverage CI/CD pipelines for automated testing and deployment.
+
+Use feature toggles to control feature visibility without redeploying.
+
+By selecting the right strategy based on your application’s needs, you can achieve seamless updates with minimal risk
+
