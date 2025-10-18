@@ -1,0 +1,105 @@
+
+1)
+@RequestScope bean request getting stored across multiple request ? how to prevent ?
+
+In Spring, a @RequestScope bean should be created fresh for each HTTP request.
+If you see it persisting across multiple requests, it usually means one of these issues is happening:
+
+Common Causes
+Not actually in a web request context
+
+If you run code outside of an HTTP request (e.g., in a background thread, scheduler, or test without MockMvc), Spring falls back to a singleton proxy unless configured otherwise.
+Improper bean injection into singleton
+
+If a @RequestScope bean is injected directly into a singleton bean, the proxy may hold onto the same instance longer than expected.
+Custom thread pools / async calls
+
+Request scope is bound to the servlet thread. If you spawn new threads without propagating the request context, the scope won’t reset.
+Session scope confusion
+
+Accidentally using @SessionScope or caching request data in a session-scoped or singleton bean.
+How to Prevent Persistence Across Requests
+1. Use Scoped Proxy Correctly
+Java
+
+Copy code
+@Component
+@RequestScope(proxyMode = ScopedProxyMode.TARGET_CLASS)
+public class MyRequestBean {
+    private final String id = UUID.randomUUID().toString();
+    public String getId() { return id; }
+}
+This ensures that when injected into a singleton, Spring uses a proxy that resolves the correct instance per request.
+
+2. Avoid Storing Request Bean in Singleton Fields
+❌ Wrong:
+
+Java
+
+Copy code
+@Component
+public class MyService {
+    private final MyRequestBean bean; // Holds same proxy instance
+    public MyService(MyRequestBean bean) { this.bean = bean; }
+}
+✅ Better:
+
+Java
+
+Copy code
+@Component
+public class MyService {
+    @Autowired
+    private ObjectFactory<MyRequestBean> beanFactory;
+
+    public void process() {
+        MyRequestBean bean = beanFactory.getObject(); // Fresh per request
+    }
+}
+3. Ensure Code Runs in HTTP Request Context
+If you use async:
+
+Java
+
+Copy code
+@Async
+public void asyncMethod() {
+    // Request scope won't work here unless you propagate context
+}
+Use DelegatingSecurityContextRunnable or RequestContextHolder to propagate request attributes.
+
+4. Check for Caching
+Make sure you’re not manually caching the request-scoped bean or its data in a static field, singleton, or session.
+
+✅ Summary:
+
+Use proxyMode when injecting into singletons.
+Don’t store request beans in long-lived objects.
+Keep execution within the request thread or propagate context.
+If you want, I can give you a full runnable Spring Boot example showing correct @RequestScope behavior and how to test it.
+Do you want me to prepare that?
+
+
+
+JavaScript
+Testing Tools
+
+Generate test data
+
+Integrate test cases
+More Actions
+
+Perform code review
+
+Explain the code
+
+Add error handling
+
+Make code compilable
+Recreate
+
+
+
+Copy
+
+Export
