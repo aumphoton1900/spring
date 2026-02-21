@@ -49,3 +49,4 @@ spring:
       spec: expireAfterWrite=10m,refreshAfterWrite=5m
 This configuration ensures that entries expire after 10 minutes and refresh 
 
+02] https://medium.com/@jabriassia29/local-vs-distributed-caching-in-spring-boot-13f017cc1ba0
