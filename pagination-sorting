@@ -117,3 +117,6 @@ A client could then make a request like:
 Code
 
 GET /products?page=1&size=5&sortBy=productName&sortDirection=desc
+
+2. https://howtodoinjava.com/spring-data/pagination-sorting-example/#42-sorting-only
+
