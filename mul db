@@ -1,0 +1,41 @@
+https://mookypoo.medium.com/spring-boot-connect-to-multiple-databases-4cd56773fbcc
+
+The Core Reason: Why You Need These Specific BeansWhen you connect a standard Spring Boot application to a single database, 
+Spring Boot's autoconfiguration automatically creates exactly one DataSource, one EntityManagerFactory, and one TransactionManager 
+behind the scenes.However, Spring Boot cannot automatically guess how to distribute entities and database connections across 
+multiple databases. When you configure multiple databases, you must explicitly declare these three objects 
+for each database because they rely on each other in a strict hierarchy:DataSource (The Connection): 
+This manages the physical connection pool (e.g., HikariCP) to a specific database URL, username, and password. 
+
+Database A cannot use the connection pool of Database B.EntityManagerFactory (The Object-Relational Mapper): 
+This maps your Java objects (@Entity) to actual database tables. It needs a dedicated DataSource 
+to know where to run SQL queries, and a specific package path to know which Java classes belong 
+to that specific database.TransactionManager (The Boundary Guard): This manages transactions (commit, rollback). 
+It wraps around a specific EntityManagerFactory. If an error occurs on Database A, 
+this manager ensures only Database A rolls back, leaving Database B unaffected.Alternative ArchitecturesManually 
+splitting packages and duplicating beans is the standard approach for a monolithic architecture using Spring Data JPA. 
+
+
+However, there are three alternative ways to handle multiple databases depending on your specific use 
+case:1. Dynamic Routing (AbstractRoutingDataSource)If your databases share the exact same schema/tables—such 
+as a Read/Write replica setup or a Multi-tenant application (one database per client)—you do not need separate 
+package structures, multiple EntityManagerFactory beans, or multiple TransactionManager beans.How it works: 
+You define a single EntityManagerFactory and a single TransactionManager. However, you feed them a dynamic 
+routing datasource that extends Spring’s AbstractRoutingDataSource.
+
+The benefit: A lookup key (often controlled via ThreadLocal or AOP annotations) changes the target database connection on the 
+fly before a query executes.2. Native JDBC / JdbcClient / MyBatisIf you bypass Hibernate/JPA entirely, 
+you can eliminate the EntityManagerFactory bean requirement altogether.How it works: You only configure 
+separate DataSource beans and lightweight JdbcClient (or JdbcTemplate) instances mapped to those data sources.
+The benefit: Ideal if you are just pulling raw data or doing simple read-only tracking metrics from a secondary database, 
+avoiding the overhead of heavy JPA entity management altogether.3. Microservices ArchitectureInstead of making 
+one massive Spring Boot application connect to multiple databases, you split the application into 
+separate microservices.How it works: Service A manages Database A, and Service B manages Database B. 
+When Service A needs data from Database B, it makes a REST call, gRPC request, or listens to a Kafka message topic 
+hosted by Service B.The benefit: 
+It honors the core software pattern of "one database per service," decoupling code entirely and scaling applications independently.
+
+
+02]
+spring: 'config.activate.on-profile': dev
+
