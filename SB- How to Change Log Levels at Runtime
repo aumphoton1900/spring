@@ -1,3 +1,5 @@
+https://www.google.com/search?q=To+reload+properties+(e.g.%2C+feature+toggles%2C+database+settings)+without+a+restart%2C+use+Spring+Cloud+and+the+%2Factuator%2Frefresh+endpoint&rlz=1C1GBSK_enIN1124IN1124&sourceid=chrome&ie=UTF-8&source=chrome.ctxt
+
 To dynamically modify configurations and log levels at runtime without 
 restarting your Spring Boot application server, you must use specific Spring Boot Actuator and 
 Spring Cloud features.
