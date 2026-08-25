@@ -1,0 +1,16 @@
+2. How to Dynamically Change Configuration PropertiesTo reload properties 
+(e.g., feature toggles, database settings) 
+without a restart, use Spring Cloud and 
+the /actuator/refresh endpoint.
+
+Step A: Add Dependencies
+
+Include the Spring Cloud context starter in your pom.xml:xml
+
+<dependency>
+    <groupId>org.springframework.cloud</groupId>
+    <artifactId>spring-cloud-starter</artifactId>
+</dependency>
+
+Use code with caution.
+
