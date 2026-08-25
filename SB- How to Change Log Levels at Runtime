@@ -1,1 +1,44 @@
+To dynamically modify configurations and log levels at runtime without 
+restarting your Spring Boot application server, you must use specific Spring Boot Actuator and 
+Spring Cloud features.
 
+By default, standard Spring properties are immutable after initialization. 
+However, you can make them dynamic by combining Spring Boot Actuator with Spring Cloud Commons / Config.
+
+1. How to Change Log Levels at RuntimeYou can modify log levels instantly using Actuator’s built-in 
+/actuator/loggers endpoint without adding any extra dependencies.
+
+Step A: Expose the Loggers EndpointAdd the following line to your application.properties or application.yml file 
+to expose the endpoint over HTTP:propertiesmanagement.endpoints.web.exposure.include=loggers
+Use code with caution.
+
+Step B: View or Change Levels via HTTP RequestsTo View All Loggers (GET):bashcurl -X GET http://localhost:8080/actuator/loggers
+Use code with caution.
+
+To Change a Specific Log Level (POST):Send a POST request to /actuator/loggers/{package}. 
+The configuredLevel must be provided in a JSON body (e.g., DEBUG, INFO).
+To Revert to Default (Reset):Pass null as the configuredLevel to remove custom configuration and inherit the root level.
+
+2. How to Dynamically Change Configuration PropertiesTo reload properties (e.g., feature toggles, database settings) 
+without a restart, use Spring Cloud and the /actuator/refresh endpoint.
+
+Step A: Add DependenciesInclude the Spring Cloud context starter in your pom.xml:xml<dependency>
+    <groupId>org.springframework.cloud</groupId>
+    <artifactId>spring-cloud-starter</artifactId>
+</dependency>
+Use code with caution.
+Step B: Enable the Refresh EndpointExpose the endpoint in your application.properties:
+propertiesmanagement.endpoints.web.exposure.include=refresh,loggers
+Use code with caution.
+
+Step C: Annotate Beans with @RefreshScopeAnnotate Spring components (using @Value or @ConfigurationProperties) with 
+@RefreshScope to allow re-initialization upon configuration changes.
+
+Step D: Trigger the Configuration ReloadUpdate the external configuration file.
+POST to the refresh endpoint: 
+curl -X POST http://localhost:8080/actuator/refresh.
+
+The application will update the Environment and recreate annotated beans instantly.
+
+⚠️ Security Production Warning: Endpoints like /actuator/loggers or /actuator/refresh should be protected 
+by Spring Security to prevent unauthorized access.
